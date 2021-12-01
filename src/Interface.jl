@@ -4,7 +4,7 @@
 #
 ################################################################################
 
-using Unitful, StaticArrays
+using Unitful, StaticArrays, InteratomicPotentials
 
 export ElectronicStructureData, gen_test_data
 
