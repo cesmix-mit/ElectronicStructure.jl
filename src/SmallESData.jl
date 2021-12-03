@@ -29,25 +29,47 @@ function lower_tri_vec(s::SMatrix{D, D}) where {D}
     return [ s[i, j]  for j in 1:3 for i in j:3 ]
 end
 
+
 """
-    linearize(v::Vector)
+    linearize(energies::Vector{Unitful.Energy})
     
-Linearize a vector of forces, or a vector of stresses. Units are removed.
+Linearize a vector of energies. Units are removed.
 """
-function linearize(v::Vector)
+function linearize(energies::Vector{Unitful.Energy})
+    return map(x->x.val, energies)
+end
+
+"""
+    linearize(forces::Vector{Vector{SVector{D, Unitful.Force}}}) where {D}
+    
+Linearize a vector of forces. Units are removed.
+"""
+function linearize_aux(v::Vector)
     return map(x->x.val, vcat(map(vec, v)...))
+end
+function linearize(forces::Vector{Vector{SVector{D, Unitful.Force}}}) where {D}
+    return vcat(linearize_aux.(forces)...)
+end
+
+"""
+    linearize(stresses::Vector{SMatrix{D, D, Unitful.Pressure}}) where {D}
+    
+Linearize a vector of stresses. Only the upper triangular part of each stress is
+considered. Units are removed.
+"""
+function linearize(stresses::Vector{SMatrix{D, D, Unitful.Pressure}}) where {D}
+    return map(x->x.val, vcat(map(vec, lower_tri_vec.(stresses))...))
 end
 
 """
     linearize(d::SmallESData)
     
-Linearize the energies, forces, and stresses of a SmallESData struct. Units are removed.
+Linearize the energies, forces, and stresses of a SmallESData struct. 
+Only the upper triangular part of each stress is considered. Units are removed.
 """
 function linearize(d::SmallESData)
-    return vcat( map(x->x.val, d.energies), 
-                 vcat(linearize.(d.forces)...),
-                 linearize(lower_tri_vec.(d.stresses)))
+    return vcat( linearize(d.energies),
+                 linearize(d.forces),
+                 linearize(d.stresses))
 end
-
-
 
