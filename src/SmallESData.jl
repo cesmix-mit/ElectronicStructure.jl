@@ -45,7 +45,7 @@ end
 Linearize a vector of forces. Units are removed.
 """
 function linearize_aux(v::Vector)
-    return map(x->x.val, vcat(map(vec, v)...))
+    return Vector(map(x->x.val, vcat(v...)))
 end
 function linearize(forces::Vector{Vector{SVector{D, Unitful.Force}}}) where {D}
     return vcat(linearize_aux.(forces)...)
